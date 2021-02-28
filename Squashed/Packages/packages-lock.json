@@ -109,7 +109,11 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.test-framework": {
+<<<<<<< HEAD
       "version": "1.1.22",
+=======
+      "version": "1.1.20",
+>>>>>>> main
       "depth": 0,
       "source": "registry",
       "dependencies": {
