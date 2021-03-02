@@ -10,6 +10,7 @@ public class Entity : MonoBehaviour
     public float Y;
     public int health;
     public int team;
+    public List<GameObject>[] allunits = new List<GameObject>[2];
 
 
 }

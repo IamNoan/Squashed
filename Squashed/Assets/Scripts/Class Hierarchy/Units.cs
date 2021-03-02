@@ -13,13 +13,14 @@ public class Units : Entity
     
     public Camera camera;
     public Grid grid;
-    private bool clicked;
-    private bool gotclick;
+    public bool clicked;
+    public bool exited;
     private Vector3 mousepos;
     public GameObject CList;
     //portée de déplacement
     private float MoveRange;
     private float MemoryRange;
+    
     
     #region Methods
 
@@ -107,7 +108,7 @@ public class Units : Entity
         MoveRange = 3;
         MemoryRange = MoveRange;
 
-        if (clicked && Input.GetMouseButtonDown(0))
+        if (clicked && Input.GetMouseButtonDown(0) && !hasMoved && exited)
         {
             //Récupère la position de la souris par rapport à la camera
             mousepos = camera.ScreenToWorldPoint(Input.mousePosition);
@@ -133,20 +134,44 @@ public class Units : Entity
             if (Abs(mousepos.x + 0.5f - transform.position.x) + Abs(mousepos.y + 0.5f - transform.position.y) <= MoveRange && !IsPresent(CList.GetComponent<Game>().CoordList, (mousepos.x + 0.5f, mousepos.y + 0.5f)))
             {
                 //Change la position sur la case ou le joueur a cliqué
-                transform.position = new Vector3(mousepos.x + 0.5f, mousepos.y + 0.5f, 0);                    
+                transform.position = new Vector3(mousepos.x + 0.5f, mousepos.y + 0.5f, 0);
+                hasMoved = true;
+                
             }
             MoveRange = MemoryRange;
+        }
+
+        if (hasMoved)
+        {
+            this.GetComponent<SpriteRenderer>().color = Color.gray;
+            clicked = false;
+            exited = false;
+        }
+        else
+        {
+            this.GetComponent<SpriteRenderer>().color = Color.white;
+        }
+
+        if (Input.GetMouseButtonDown(1))
+        {
+            clicked = false;
+            exited = false;
         }
     }
 
     void OnMouseDown()
     {
-        foreach (var VARIABLE in units)
-        {
-            
-        }
         clicked = true;
     }
+
+    private void OnMouseExit()
+    {
+        if (clicked)
+        {
+            exited = true;
+        }
+    }
+
     #endregion
 }
 

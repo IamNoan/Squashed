@@ -8,23 +8,38 @@ public class Game : MonoBehaviour
 
     #region Variables
 
+    //Turn Based Implementation
     public GameObject playerturn;
     public GameObject iaturn;
+    
+    //gameObjects Imports
     public GameObject game;
     public GameObject ObstaclePrefab;
+
+    //Buildings imports
+    public GameObject build;
+    public Sprite sbuild1;
+    public Sprite sbuild2;
+    
+    //Unit type 1
     public GameObject unit1;
     public Sprite sprite1;
+    
+    //Unit type 2
     public GameObject unit2;
     public Sprite sprite2;
+    
+    //Other imports
     public Camera cam;
     public Grid gri;
     
-    
-
+    //Creating utils
     public List<GameObject> ObsList = new List<GameObject>();
     public List<(float,float)> CoordList = new List<(float,float)>();
-    private List<GameObject> P1unit = new List<GameObject>();
-    private List<GameObject> P2unit = new List<GameObject>();
+    public List<GameObject> P1unit = new List<GameObject>();
+    public List<GameObject> P2unit = new List<GameObject>();
+    public float DeplacementRange;
+    public float DetectionRange;
 
     #endregion
     
@@ -32,20 +47,22 @@ public class Game : MonoBehaviour
 
     private void AddUnits(List<GameObject> li, int team)
     {
-        int x;
+        float x;
         Sprite spr;
         if (team==1)
         {
-            x = -10;
+            x = -10.5f;
             spr = sprite1;
         }
         else
         {
-            x = 4;
+            x = 4.5f;
             spr = sprite2;
         }
-        li.Add(Instantiate(unit1,new Vector3(x,-5,-1),Quaternion.identity));
-        li.Add(Instantiate(unit2,new Vector3(x,5,-1),Quaternion.identity));
+        
+        //Creation des fourmis a partir des prefab
+        li.Add(Instantiate(unit1,new Vector3(x,-5.5f,-1),Quaternion.identity));
+        li.Add(Instantiate(unit2,new Vector3(x,5.5f,-1),Quaternion.identity));
         foreach (var unit in li)
         {
             unit.GetComponent<Units>().team = team;
@@ -82,11 +99,38 @@ public class Game : MonoBehaviour
             ObsList.Add((GameObject)Instantiate(ObstaclePrefab, new Vector3( a, b, -1), Quaternion.identity));
         }
     }
+
+    private void BuildingsInit(int team)
+    {
+        Sprite spr;
+        float x;
+        if (team == 1)
+        {
+            spr = sbuild1;
+            x = -17.5f;
+        }
+        else
+        {
+            spr = sbuild2;
+            x = 8.5f;
+        }
+
+        //Create a new building and change his parameters
+        var newbuild = Instantiate(build, new Vector3(x,0.5f,-1), Quaternion.identity);
+        newbuild.GetComponent<Building>().X = transform.position.x;
+        newbuild.GetComponent<Building>().Y = transform.position.y;
+        newbuild.GetComponent<Building>().health = 500;
+        newbuild.GetComponent<Building>().team = team;
+        newbuild.GetComponent<Building>().cost = 20;
+        newbuild.GetComponent<SpriteRenderer>().sprite = spr;
+        
+    }
     #endregion
 
 
     #region public methods
 
+    
     public void gotoIATurn()
     {
         playerturn.SetActive(false);
@@ -102,6 +146,8 @@ public class Game : MonoBehaviour
         AddUnits(P1unit,1);
         AddUnits(P2unit,2);
         ObstaclesInit();
+        BuildingsInit(1);
+        BuildingsInit(2);
         playerturn.SetActive(true);
         iaturn.SetActive(false);
         

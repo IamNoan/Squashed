@@ -5,4 +5,6 @@ using System.Text;
 public class Building : Entity
 {
     public int cost;
+    
+    
 }
