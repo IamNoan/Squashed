@@ -1,16 +1,22 @@
 ﻿using UnityEngine;
 using Photon.Pun;
 using UnityEngine.SceneManagement;
+using Photon.Realtime;
 
 
 namespace Com.MyCompany.MyGame
 {
-    public class Launcher : MonoBehaviour
+    public class Launcher : MonoBehaviourPunCallbacks
     {
         public GameObject UI;
         
         #region Private Serializable Fields
-
+        /// <summary>
+        /// The maximum number of players per room. When a room is full, it can't be joined by new players, and so new room will be created.
+        /// </summary>
+        [Tooltip("The maximum number of players per room. When a room is full, it can't be joined by new players, and so new room will be created")]
+        [SerializeField]
+        private byte maxPlayersPerRoom = 4;
 
         #endregion
 
@@ -24,6 +30,13 @@ namespace Com.MyCompany.MyGame
         string gameVersion = "1";
 
 
+        /// <summary>
+        /// Keep track of the current process. Since connection is asynchronous and is based on several callbacks from Photon,
+        /// we need to keep track of this to properly adjust the behavior when we receive call back by Photon.
+        /// Typically this is used for the OnConnectedToMaster() callback.
+        /// </summary>
+        bool isConnecting;
+        
         #endregion
 
 
@@ -63,6 +76,29 @@ namespace Com.MyCompany.MyGame
         [SerializeField]
         private GameObject progressLabel;
 
+        public override void OnJoinRandomFailed(short returnCode, string message)
+        {
+            Debug.Log("PUN Basics Tutorial/Launcher:OnJoinRandomFailed() was called by PUN. No random room available, so we create one.\nCalling: PhotonNetwork.CreateRoom");
+
+            // #Critical: we failed to join a random room, maybe none exists or they are all full. No worries, we create a new room.
+            PhotonNetwork.CreateRoom(null, new RoomOptions { MaxPlayers = maxPlayersPerRoom });
+        }
+
+        public override void OnJoinedRoom()
+        {
+            // #Critical: We only load if we are the first player, else we rely on `PhotonNetwork.AutomaticallySyncScene` to sync our instance scene.
+            if (PhotonNetwork.CurrentRoom.PlayerCount == 1)
+            {
+                Debug.Log("We load the 'Room for 1' ");
+
+
+                // #Critical
+                // Load the Room Level.
+                PhotonNetwork.LoadLevel("Waiting Room 1");
+            }
+            Debug.Log("PUN Basics Tutorial/Launcher: OnJoinedRoom() called by PUN. Now this client is in a room.");
+        }
+        
         /// <summary>
         /// Start the connection process.
         /// - If already connected, we attempt joining a random room
@@ -70,6 +106,8 @@ namespace Com.MyCompany.MyGame
         /// </summary>
         public void Connect()
         {
+            
+            
             progressLabel.SetActive(true);
             controlPanel.SetActive(false);
             // we check if we are connected or not, we join if we are , else we initiate the connection to the server.
@@ -81,17 +119,19 @@ namespace Com.MyCompany.MyGame
             else
             {
                 // #Critical, we must first and foremost connect to Photon Online Server.
-                PhotonNetwork.ConnectUsingSettings();
+                // keep track of the will to join a room, because when we come back from the game we will get a callback that we are connected, so we need to know what to do then
+                isConnecting = PhotonNetwork.ConnectUsingSettings();
                 PhotonNetwork.GameVersion = gameVersion;
             }
         }
-
+        
         public void OnDisconnect()
         {
             progressLabel.SetActive(false);
             controlPanel.SetActive(true);
         }
 
+        
         public void GoBack()
         {
             SceneManager.LoadScene(0);
@@ -100,6 +140,28 @@ namespace Com.MyCompany.MyGame
 
     #endregion
 
+        #region MonoBehaviourPunCallbacks Callbacks
+
+
+        public override void OnConnectedToMaster()
+        {
+            if (isConnecting)
+            {
+                // #Critical: The first we try to do is to join a potential existing room. If there is, good, else, we'll be called back with OnJoinRandomFailed()
+                PhotonNetwork.JoinRandomRoom();
+                isConnecting = false;
+            }
+        }
+
+
+        public override void OnDisconnected(DisconnectCause cause)
+        {
+            isConnecting = false;
+            Debug.LogWarningFormat("PUN Basics Tutorial/Launcher: OnDisconnected() was called by PUN with reason {0}", cause);
+        }
+
+        
+        #endregion
 
     }
 }

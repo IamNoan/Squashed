@@ -4,7 +4,6 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-<<<<<<< HEAD
   m_Scenes:
   - enabled: 1
     path: Assets/Scenes/Menu.unity
@@ -15,7 +14,16 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Main.unity
     guid: c3564d88221951741864918bd7c2677f
-=======
-  m_Scenes: []
->>>>>>> main
+  - enabled: 1
+    path: Assets/Scenes/Waiting Room 1.unity
+    guid: d149aa0b76f133d438a70a23fb0eaa67
+  - enabled: 1
+    path: Assets/Scenes/Waiting Room 2.unity
+    guid: f871104415eb2bf4992258f7bd59da67
+  - enabled: 1
+    path: Assets/Scenes/Room for 1.unity
+    guid: b24db36c43feda742baf18e9b6c94c8c
+  - enabled: 1
+    path: Assets/Scenes/Room for 2.unity
+    guid: 075eee15073c0e842963fb6d29904fc5
   m_configObjects: {}
