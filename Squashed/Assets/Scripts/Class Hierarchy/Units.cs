@@ -20,8 +20,9 @@ public class Units : Entity
     //portée de déplacement
     private float MoveRange;
     private float MemoryRange;
-    
-    
+    public GameObject bluecase;
+    public List<GameObject> CaseList = new List<GameObject>();
+
     #region Methods
 
     private static bool IsPresent(List<(float,float)> liste, (float,float) couple)
@@ -96,10 +97,80 @@ public class Units : Entity
         }
         return Ofound;
     }
+    
+     // fonction qui initie toutes les cases
+    private void ZonePrinter()
+    {
+        float px = transform.position.x;
+        float py = transform.position.y;
+        // C'est pas beau mais c'est temporaire
 
+        for (int i = 0; i < 7; i++)
+        {
+            CaseList.Add(Instantiate(bluecase, new Vector3(px, py + 3 - i, -1), Quaternion.identity));
+        }
+        CaseList.Add(Instantiate(bluecase, new Vector3(px-1,py+2, -1), Quaternion.identity));
+        CaseList.Add(Instantiate(bluecase, new Vector3(px+1, py+2, -1), Quaternion.identity));
+        CaseList.Add(Instantiate(bluecase, new Vector3(px-2, py+1, -1), Quaternion.identity));
+        CaseList.Add(Instantiate(bluecase, new Vector3(px-1, py+1, -1), Quaternion.identity));
+        CaseList.Add(Instantiate(bluecase, new Vector3(px+1, py+1, -1), Quaternion.identity));
+
+        CaseList.Add(Instantiate(bluecase, new Vector3(px+2, py+1, -1), Quaternion.identity));
+        CaseList.Add(Instantiate(bluecase, new Vector3(px-3, py, -1), Quaternion.identity));
+        CaseList.Add(Instantiate(bluecase, new Vector3(px-2, py, -1), Quaternion.identity));
+        CaseList.Add(Instantiate(bluecase, new Vector3(px-1, py, -1), Quaternion.identity));
+        CaseList.Add(Instantiate(bluecase, new Vector3(px+1, py, -1), Quaternion.identity));
+
+        CaseList.Add(Instantiate(bluecase, new Vector3(px+2, py, -1), Quaternion.identity));
+        CaseList.Add(Instantiate(bluecase, new Vector3(px+3, py, -1), Quaternion.identity));
+        CaseList.Add(Instantiate(bluecase, new Vector3(px-2, py-1, -1), Quaternion.identity));
+        CaseList.Add(Instantiate(bluecase, new Vector3(px-1, py-1, -1), Quaternion.identity));
+        CaseList.Add(Instantiate(bluecase, new Vector3(px+1, py-1, -1), Quaternion.identity));
+
+        CaseList.Add(Instantiate(bluecase, new Vector3(px+2, py-1, -1), Quaternion.identity));
+        CaseList.Add(Instantiate(bluecase, new Vector3(px-1, py-2, -1), Quaternion.identity));
+        CaseList.Add(Instantiate(bluecase, new Vector3(px+1, py-2, -1), Quaternion.identity)); 
+    }
+
+    //Cette fonction déplace toutes les cases avec le joueur (utilisée dans l'Update de mouvement)
+    private void ZoneMover(float mouvementX, float mouvementY)
+    {
+        foreach (GameObject C in CaseList)
+        {
+            C.transform.position = new Vector3(C.transform.position.x + mouvementX, C.transform.position.y + mouvementY, 0);
+        }
+    }
+
+    //fonction qui détermine quand et quelle case afficher.
+    private void Shower()
+    {
+        
+        //Quand l'unité a été cliquée et attend une direction.
+        foreach (GameObject C in CaseList)
+        {
+            if (IsPresent(CList.GetComponent<Game>().CoordList, (C.transform.position.x, C.transform.position.y)))
+            {
+                C.SetActive(false);
+            }
+            else C.SetActive(true);
+        }
+
+        //Ne pas oublier de mettre un foreach qui clear les cases après le déplacement dans l'update
+    }
     #endregion
 
     #region MonoBehavior
+
+    //Start
+
+    private void Start()
+    {
+        ZonePrinter();
+        foreach (GameObject C in CaseList)
+        {
+            C.SetActive(false);
+        }
+    }
 
     // Update is called once per frame
     void Update()
@@ -107,6 +178,11 @@ public class Units : Entity
 
         MoveRange = 3;
         MemoryRange = MoveRange;
+
+        if (clicked)
+        {
+            Shower();
+        }
 
         if (clicked && Input.GetMouseButtonDown(0) && !hasMoved && exited)
         {
@@ -128,11 +204,21 @@ public class Units : Entity
                 MoveRange -= 2;
                 if (MoveRange < 1) MoveRange = 1;
             }
-           
+            
+            
 
             //Check si la case est à portée et si elle est occupée par un obstacle.
             if (Abs(mousepos.x + 0.5f - transform.position.x) + Abs(mousepos.y + 0.5f - transform.position.y) <= MoveRange && !IsPresent(CList.GetComponent<Game>().CoordList, (mousepos.x + 0.5f, mousepos.y + 0.5f)))
             {
+
+                // Ce foreach désactive toutes les cases une fois le mouvement fait
+                foreach (GameObject C in CaseList)
+                {
+                    C.SetActive(false);
+                }
+
+                ZoneMover(mousepos.x + 0.5f - transform.position.x, mousepos.y + 0.5f - transform.position.y);
+
                 //Change la position sur la case ou le joueur a cliqué
                 transform.position = new Vector3(mousepos.x + 0.5f, mousepos.y + 0.5f, 0);
                 hasMoved = true;
@@ -171,6 +257,8 @@ public class Units : Entity
             exited = true;
         }
     }
+
+   
 
     #endregion
 }

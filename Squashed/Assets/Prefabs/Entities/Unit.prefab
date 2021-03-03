@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: -4385640070979777641}
   - component: {fileID: 5580486637960446121}
   m_Layer: 0
-  m_Name: New_Piskel
+  m_Name: Unit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -132,4 +132,9 @@ MonoBehaviour:
   hasMoved: 0
   camera: {fileID: 0}
   grid: {fileID: 0}
+  clicked: 0
+  exited: 0
   CList: {fileID: 0}
+  bluecase: {fileID: 4251658022503228650, guid: add91d18e29d2194fba1a5a4965eac27,
+    type: 3}
+  CaseList: []
